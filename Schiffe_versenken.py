@@ -24,12 +24,12 @@ class GUI(Frame):
 
         for x in range(self.grid_length):
             for y in range(self.grid_length, self.grid_length + 1):
-                l = Label(master=self.f1, bg = "grey", height = "1")
+                l = Label(master=self.f1, bg = "grey")
                 l.grid(row=y, column=x, sticky=N+S+E+W)
 
         for x in range(self.grid_length):
-            for y in range(self.grid_length + 1, self.grid_length + 11):
-                b = Button(master=self.f1,text="{}/{}".format(x,y - 11))
+            for y in range(self.grid_length + 1, self.grid_length + self.grid_length + 1):
+                b = Button(master=self.f1,text="{}/{}".format(x,y - self.grid_length - 1))
                 b.grid(row=y, column=x, sticky=N+S+E+W)
 
 
