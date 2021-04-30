@@ -32,6 +32,20 @@ class GUI(Frame):
                 b = Button(master=self.f1,text="{}/{}".format(x,y - self.grid_length - 1))
                 b.grid(row=y, column=x, sticky=N+S+E+W)
 
+    #Command für Rückgabe wenn auf Button gedrückt wird            
+    def aktionSF():
+        label3 = tk.Label(root, text="Aktion durchgeführt", bg="yellow")
+        label3.pack()
+
+    root = tk.Tk()
+
+    label1 = tk.Label(root, text="Hallo Welt", bg="orange")
+    label1.pack()
+
+    schaltf1 = tk.Button(root, text="Aktion durchführen", command=aktionSF)
+    schaltf1.pack()
+
+    root.mainloop()
 
 if __name__ == '__main__':
 
@@ -40,4 +54,5 @@ if __name__ == '__main__':
     app = GUI(tk_window)
     app.mainloop()
 
-    #Command für Rückgabe wenn auf Button gedrückt wird
+#Command für Rückgabe wenn auf Button gedrückt wird
+    
