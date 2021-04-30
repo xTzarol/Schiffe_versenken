@@ -19,7 +19,7 @@ class GUI(Frame):
     def create_board(self):
         for x in range(self.grid_length):
             for y in range(self.grid_length):
-                b = Button(master=self.f1,text="{}/{}".format(x,y))
+                b = Button(master=self.f1, text="{}/{}".format(x,y), command = self.check_for_hit, bg="white")
                 b.grid(row=y, column=x, sticky=N+S+E+W)
 
         for x in range(self.grid_length):
@@ -29,9 +29,15 @@ class GUI(Frame):
 
         for x in range(self.grid_length):
             for y in range(self.grid_length + 1, self.grid_length + self.grid_length + 1):
-                b = Button(master=self.f1,text="{}/{}".format(x,y - self.grid_length - 1))
+                b = Button(master=self.f1, text="{}/{}".format(x,y - self.grid_length - 1), command = self.place_ships, bg="white")
                 b.grid(row=y, column=x, sticky=N+S+E+W)
 
+    def check_for_hit(self):
+        self.configure(bg="black")
+        print("Test")
+
+    def place_ships(self):
+        self.configure(bg="black")
 
 if __name__ == '__main__':
 
