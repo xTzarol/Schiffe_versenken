@@ -19,7 +19,7 @@ class GUI(Frame):
     def create_board(self):
         for x in range(self.grid_length):
             for y in range(self.grid_length):
-                b = Button(master=self.f1,text="{}/{}".format(x,y))
+                b = Button(master=self.f1, text="{}/{}".format(x,y), command = self.check_for_hit, bg="white")
                 b.grid(row=y, column=x, sticky=N+S+E+W)
 
         for x in range(self.grid_length):
@@ -29,24 +29,16 @@ class GUI(Frame):
 
         for x in range(self.grid_length):
             for y in range(self.grid_length + 1, self.grid_length + self.grid_length + 1):
-                b = Button(master=self.f1,text="{}/{}".format(x,y - self.grid_length - 1))
+                b = Button(master=self.f1, text="{}/{}".format(x,y - self.grid_length - 1), command = self.place_ships, bg="white")
                 b.grid(row=y, column=x, sticky=N+S+E+W)
 
-    #Command für Rückgabe wenn auf Button gedrückt wird            
-    def aktionSF():
-        label3 = tk.Label(root, text="Aktion durchgeführt", bg="yellow")
-        label3.pack()
+    def check_for_hit(self):
+        self.configure(bg="black")
+        print("Test")
 
-    root = tk.Tk()
-
-    label1 = tk.Label(root, text="Hallo Welt", bg="orange")
-    label1.pack()
-
-    schaltf1 = tk.Button(root, text="Aktion durchführen", command=aktionSF)
-    schaltf1.pack()
-
-    root.mainloop()
-
+    def place_ships(self):
+        self.configure(bg="black")
+        
 if __name__ == '__main__':
 
     tk_window = Tk()
