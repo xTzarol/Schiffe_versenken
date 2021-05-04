@@ -1,12 +1,12 @@
-#erste (zweite) Version des Programms PEP8 beachten!
-from tkinter import *
-class GUI(Frame):
+#erste (zweite) Version des Programms, PEP8 beachten!
+import tkinter as tk
+class GUI(tk.Frame):
     def __init__(self, master):
         super().__init__(master) 
-        master.geometry("500x550")
+        master.geometry('500x550')
         #frame
-        self.f1 = Frame(master=master)
-        self.f1.pack(fill=BOTH, expand=True)
+        self.f1 = tk.Frame(master=master)
+        self.f1.pack(fill=tk.BOTH, expand=True)
         #game board size
         self.grid_length = 10
         self.grid_height = 2*self.grid_length + 1
@@ -21,38 +21,42 @@ class GUI(Frame):
     def create_board(self):
         for x in range(self.grid_length):
             for y in range(self.grid_length):
-                b = Button(master=self.f1, text="{}/{}".format(x,y), bg="white")
-                b.grid(row=y, column=x, sticky=N+S+E+W)
+                b = tk.Button(master=self.f1, text='{}/{}'.format(x,y),
+                              bg='white')
+                b.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
                 b.data=(x, y)
                 b.bind("<ButtonPress-1>", self.check_for_hit)
 
         for x in range(self.grid_length):
-            for y in range(self.grid_length, self.grid_height - self.grid_length):
-                l = Label(master=self.f1, bg = "grey")
-                l.grid(row=y, column=x, sticky=N+S+E+W)
+            for y in range(self.grid_length, self.grid_height
+                           - self.grid_length):
+                l = tk.Label(master=self.f1, bg = 'grey')
+                l.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
 
         for x in range(self.grid_length):
             for y in range(self.grid_length + 1, self.grid_height):
-                b = Button(master=self.f1, text="{}/{}".format(x,y - self.grid_length - 1), bg="white")
-                b.grid(row=y, column=x, sticky=N+S+E+W)
+                b = tk.Button(master=self.f1,
+                              text='{}/{}'.format(x,y - self.grid_length - 1),
+                              bg='white')
+                b.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
                 b.data=(x, y)
-                b.bind("<ButtonPress-1>", self.place_ships)
+                b.bind('<ButtonPress-1>', self.place_ships)
 
     #to be further extended
     def check_for_hit(self, event):             
-        event.widget.configure(bg="red")
-        event.widget.configure(text="")
+        event.widget.configure(bg='red')
+        event.widget.configure(text='')
         print("Test")
-        
+
     #to be further extended
     def place_ships(self, event):
-        event.widget.configure(bg="black")
-        event.widget.configure(text="")
+        event.widget.configure(bg='black')
+        event.widget.configure(text='')
 
 if __name__ == '__main__':
 
-    tk_window = Tk()
-    tk_window.title("Schiffe versenken")
+    tk_window = tk.Tk()
+    tk_window.title('Schiffe versenken')
     app = GUI(tk_window)
     app.mainloop()
 
