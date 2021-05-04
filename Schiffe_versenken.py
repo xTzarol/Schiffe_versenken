@@ -1,4 +1,4 @@
-#erste (zweite) Version des Programms
+#erste (zweite) Version des Programms PEP8 beachten!
 from tkinter import *
 class GUI(Frame):
     def __init__(self, master):
@@ -18,12 +18,13 @@ class GUI(Frame):
         for y in range(self.grid_height):
             self.f1.rowconfigure(y, weight=1)
 
-
     def create_board(self):
         for x in range(self.grid_length):
             for y in range(self.grid_length):
-                b = Button(master=self.f1, text="{}/{}".format(x,y), command = self.check_for_hit, bg="white")
+                b = Button(master=self.f1, text="{}/{}".format(x,y), bg="white")
                 b.grid(row=y, column=x, sticky=N+S+E+W)
+                b.data=(x, y)
+                b.bind("<ButtonPress-1>", self.check_for_hit)
 
         for x in range(self.grid_length):
             for y in range(self.grid_length, self.grid_height - self.grid_length):
@@ -32,15 +33,21 @@ class GUI(Frame):
 
         for x in range(self.grid_length):
             for y in range(self.grid_length + 1, self.grid_height):
-                b = Button(master=self.f1, text="{}/{}".format(x,y - self.grid_length - 1), command = self.place_ships, bg="white")
+                b = Button(master=self.f1, text="{}/{}".format(x,y - self.grid_length - 1), bg="white")
                 b.grid(row=y, column=x, sticky=N+S+E+W)
+                b.data=(x, y)
+                b.bind("<ButtonPress-1>", self.place_ships)
 
-    def check_for_hit(self):
-        self.configure(bg="black")
+    #to be further extended
+    def check_for_hit(self, event):             
+        event.widget.configure(bg="red")
+        event.widget.configure(text="")
         print("Test")
-
-    def place_ships(self):
-        self.configure(bg="black")
+        
+    #to be further extended
+    def place_ships(self, event):
+        event.widget.configure(bg="black")
+        event.widget.configure(text="")
 
 if __name__ == '__main__':
 
