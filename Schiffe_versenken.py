@@ -9,12 +9,15 @@ class GUI(Frame):
         self.f1.pack(fill=BOTH, expand=True)
         #game board size
         self.grid_length = 10
+        self.grid_height = 2*self.grid_length + 1
         self.create_board()
 
         #make the grid expandable
         for x in range(self.grid_length):
             self.f1.columnconfigure(x, weight=1)
-            self.f1.rowconfigure(x, weight=1)
+        for y in range(self.grid_height):
+            self.f1.rowconfigure(y, weight=1)
+
 
     def create_board(self):
         for x in range(self.grid_length):
@@ -23,12 +26,12 @@ class GUI(Frame):
                 b.grid(row=y, column=x, sticky=N+S+E+W)
 
         for x in range(self.grid_length):
-            for y in range(self.grid_length, self.grid_length + 1):
+            for y in range(self.grid_length, self.grid_height - self.grid_length):
                 l = Label(master=self.f1, bg = "grey")
                 l.grid(row=y, column=x, sticky=N+S+E+W)
 
         for x in range(self.grid_length):
-            for y in range(self.grid_length + 1, self.grid_length + self.grid_length + 1):
+            for y in range(self.grid_length + 1, self.grid_height):
                 b = Button(master=self.f1, text="{}/{}".format(x,y - self.grid_length - 1), command = self.place_ships, bg="white")
                 b.grid(row=y, column=x, sticky=N+S+E+W)
 
