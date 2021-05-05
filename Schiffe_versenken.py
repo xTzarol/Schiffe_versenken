@@ -9,7 +9,7 @@ class GUI(tk.Frame):
         self.f1.pack(fill=tk.BOTH, expand=True)
         #game board size
         self.grid_length = 10
-        self.grid_height = 2*self.grid_length + 1
+        self.grid_height = 2 * self.grid_length + 1
         self.create_board()
 
         #make the grid expandable
@@ -48,10 +48,23 @@ class GUI(tk.Frame):
         event.widget.configure(text='')
         print("Test")
 
-    #to be further extended
+    #Funktion soll checken ob erste beiden gedrückten Buttons für
+    #großes Schiff passen
+    #Idee: Koordinaten von ersten Knopf bzw. Data holen unnd als Variable
+    #speichern,
+    #evtl. gleiches für zweiten Knopf. Dann checken ob Koordinaten
+    #beider Knöpfe für großes Schiff stimmen --> Ausgabe wenn Fehler
     def place_ships(self, event):
+        for i in range(5):
+            if f
+
+
         event.widget.configure(bg='black')
         event.widget.configure(text='')
+
+#unklar ob neue Klasse für Spielablauf empfohlen ist?
+#class Gamelogic:
+    #def check_for_hit(self)
 
 if __name__ == '__main__':
 
