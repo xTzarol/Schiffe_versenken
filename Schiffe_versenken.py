@@ -1,5 +1,6 @@
 #erste (zweite) Version des Programms
 from tkinter import *
+
 class GUI(Frame):
     def __init__(self, master):
         super().__init__(master) 
@@ -36,8 +37,11 @@ class GUI(Frame):
         self.configure(bg="black")
         print("Test")
 
+            
     def place_ships(self):
         self.configure(bg="black")
+        print("Test1")
+
         
 if __name__ == '__main__':
 
