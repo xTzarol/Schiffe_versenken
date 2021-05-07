@@ -1,7 +1,6 @@
 #erste (zweite) Version des Programms, PEP8 beachten!
-global shipcords = []
-for i in range (4):
-    shipcords.append(0)
+global shipcords
+shipcords = []
 
 import tkinter as tk
 class GUI(tk.Frame):
@@ -23,12 +22,16 @@ class GUI(tk.Frame):
             self.f1.rowconfigure(y, weight=1)
 
     def create_board(self):
+        buttonsincol = []
         for x in range(self.grid_length):
+            shipcords.append(buttonsincol)
+            del buttonsincol[:]
             for y in range(self.grid_length):
                 b = tk.Button(master=self.f1, text='{}/{}'.format(x,y),
                               bg='white')
                 b.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
                 b.data=(x, y)
+                buttonsincol.append(b)
                 b.bind("<ButtonPress-1>", self.check_for_hit)
 
         for x in range(self.grid_length):
@@ -54,14 +57,10 @@ class GUI(tk.Frame):
 
     #Funktion soll checken ob erste beiden gedrückten Buttons für
     #großes Schiff passen
-    #Idee: Koordinaten von ersten Knopf bzw. Data holen und als 
-    #globale Variable speichern damit bei zweitem Ausführen der
-    #Unterfunktion die vorherigen Daten nicht verloren gehen
-    #evtl. gleiches für zweiten Knopf. Dann checken ob Koordinaten
-    #beider Knöpfe für großes Schiff stimmen --> Ausgabe wenn Fehler
+    #Idee: 
     def place_ships(self, event):
         #shipcords = event.widget.data
-        #print(shipcords)
+        shipcords[3].widget.configure(bg="blue")
 
 
         event.widget.configure(bg='black')
