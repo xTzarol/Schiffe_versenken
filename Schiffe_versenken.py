@@ -1,16 +1,9 @@
-<<<<<<< HEAD
-#erste (zweite) Version des Programms
-from tkinter import *
-
-class GUI(Frame):
-=======
 #erste (zweite) Version des Programms, PEP8 beachten!
 import tkinter as tk
 class GUI(tk.Frame):
->>>>>>> 2550cd38489da6ead9fb21c68da0ab7282e75644
     def __init__(self, master):
         super().__init__(master) 
-        master.geometry('500x550')
+        master.geometry('500x550') 
         #frame
         self.f1 = tk.Frame(master=master)
         self.f1.pack(fill=tk.BOTH, expand=True)
@@ -26,6 +19,7 @@ class GUI(tk.Frame):
             self.f1.rowconfigure(y, weight=1)
 
     def create_board(self):
+        
         for x in range(self.grid_length):
             for y in range(self.grid_length):
                 b = tk.Button(master=self.f1, text='{}/{}'.format(x,y),
@@ -55,12 +49,6 @@ class GUI(tk.Frame):
         event.widget.configure(text='')
         print("Test")
 
-<<<<<<< HEAD
-            
-    def place_ships(self):
-        self.configure(bg="black")
-        print("Test1")
-=======
     #Funktion soll checken ob erste beiden gedrückten Buttons für
     #großes Schiff passen
     #Idee: Koordinaten von ersten Knopf bzw. Data holen unnd als Variable
@@ -68,8 +56,8 @@ class GUI(tk.Frame):
     #evtl. gleiches für zweiten Knopf. Dann checken ob Koordinaten
     #beider Knöpfe für großes Schiff stimmen --> Ausgabe wenn Fehler
     def place_ships(self, event):
-        for i in range(5):
-            if f
+       # for i in range(5):
+        
 
 
         event.widget.configure(bg='black')
@@ -78,7 +66,6 @@ class GUI(tk.Frame):
 #unklar ob neue Klasse für Spielablauf empfohlen ist?
 #class Gamelogic:
     #def check_for_hit(self)
->>>>>>> 2550cd38489da6ead9fb21c68da0ab7282e75644
 
         
 if __name__ == '__main__':
