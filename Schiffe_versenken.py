@@ -1,4 +1,8 @@
 #erste (zweite) Version des Programms, PEP8 beachten!
+global shipcords = []
+for i in range (4):
+    shipcords.append(0)
+
 import tkinter as tk
 class GUI(tk.Frame):
     def __init__(self, master):
@@ -51,13 +55,14 @@ class GUI(tk.Frame):
 
     #Funktion soll checken ob erste beiden gedrückten Buttons für
     #großes Schiff passen
-    #Idee: Koordinaten von ersten Knopf bzw. Data holen unnd als Variable
-    #speichern,
+    #Idee: Koordinaten von ersten Knopf bzw. Data holen und als 
+    #globale Variable speichern damit bei zweitem Ausführen der
+    #Unterfunktion die vorherigen Daten nicht verloren gehen
     #evtl. gleiches für zweiten Knopf. Dann checken ob Koordinaten
     #beider Knöpfe für großes Schiff stimmen --> Ausgabe wenn Fehler
     def place_ships(self, event):
-       # for i in range(5):
-        
+        #shipcords = event.widget.data
+        #print(shipcords)
 
 
         event.widget.configure(bg='black')
