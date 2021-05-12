@@ -3,6 +3,7 @@ global shipcords
 shipcords = []
 
 import tkinter as tk
+
 class GUI(tk.Frame):
     def __init__(self, master):
         super().__init__(master) 
@@ -48,7 +49,7 @@ class GUI(tk.Frame):
                 b.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
                 buttonsincol.append(b)
                 b.data=(x, y)
-                b.bind('<ButtonPress-1>', self.place_ships)
+                b.bind('<ButtonPress-1>', Gamelogic.place_ships)
 
     #to be further extended
     def check_for_hit(self, event):             
@@ -58,11 +59,34 @@ class GUI(tk.Frame):
 
     #Funktion soll checken ob erste beiden gedrückten Buttons für
     #großes Schiff passen
-    #Idee: 
-    def place_ships(self, event):
-        shipcords[1][1].configure(bg="blue")
-        event.widget.configure(bg='black')
-        event.widget.configure(text='')
+    #Idee:
+
+class Gamelogic:
+    shipcount = 8
+    placedships = []
+
+    def place_ships(event):
+        buttoncoordinates = []
+        if Gamelogic.shipcount >= 1:
+            buttoncoordinates.append(event.x)
+            buttoncoordinates.append(event.y)
+            Gamelogic.placedships.append(buttoncoordinates)
+            print(Gamelogic.placedships)
+
+                #daten von Knopf der gedrückt wird in Liste schreiben
+                #Idee (x, y) (x, y)...
+                #wenn Länge von Liste%2 --> checken ob Koordinaten der letzten beiden
+                #Knöpfe für Schiffsgröße (__shipcount) richtig liegen (x-__shipcount)
+                #oder (y-__shipcount), sonst letzten Eintrag aus Liste löschen und
+                #print("ungültiges Feld!")  
+                
+            Gamelogic.shipcount -= 1
+        else:
+            print("Es wurden bereits alle Schiffe platziert!")
+        
+    #shipcords[1][1].configure(bg="blue")
+    #event.widget.configure(bg='black')
+    #event.widget.configure(text='')
 
 #unklar ob neue Klasse für Spielablauf empfohlen ist?
 #class Gamelogic:
@@ -74,5 +98,7 @@ if __name__ == '__main__':
     tk_window.title('Schiffe versenken')
     app = GUI(tk_window)
     app.mainloop()
+    Logic = Gamelogic
 
-    #Command für Rückgabe wenn auf Button gedrückt wird
+        
+
