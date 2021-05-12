@@ -23,15 +23,13 @@ class GUI(tk.Frame):
 
     def create_board(self):
         buttonsincol = []
+        emptylist = []
         for x in range(self.grid_length):
-            shipcords.append(buttonsincol)
-            del buttonsincol[:]
             for y in range(self.grid_length):
                 b = tk.Button(master=self.f1, text='{}/{}'.format(x,y),
                               bg='white')
                 b.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
                 b.data=(x, y)
-                buttonsincol.append(b)
                 b.bind("<ButtonPress-1>", self.check_for_hit)
 
         for x in range(self.grid_length):
@@ -41,11 +39,14 @@ class GUI(tk.Frame):
                 l.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
 
         for x in range(self.grid_length):
+            shipcords.append(buttonsincol)
+            buttonsincol = emptylist
             for y in range(self.grid_length + 1, self.grid_height):
                 b = tk.Button(master=self.f1,
                               text='{}/{}'.format(x,y - self.grid_length - 1),
                               bg='white')
                 b.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
+                buttonsincol.append(b)
                 b.data=(x, y)
                 b.bind('<ButtonPress-1>', self.place_ships)
 
@@ -59,10 +60,7 @@ class GUI(tk.Frame):
     #großes Schiff passen
     #Idee: 
     def place_ships(self, event):
-        #shipcords = event.widget.data
-        shipcords[3].widget.configure(bg="blue")
-
-
+        shipcords[1][1].configure(bg="blue")
         event.widget.configure(bg='black')
         event.widget.configure(text='')
 
