@@ -60,7 +60,7 @@ class GUI(tk.Frame):
     #Idee: 
     def place_ships(self, event):
         #shipcords = event.widget.data
-        shipcords[3].widget.configure(bg="blue")
+        shipcords[3][1].widget.configure(bg="blue")
 
 
         event.widget.configure(bg='black')
