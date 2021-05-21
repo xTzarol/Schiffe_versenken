@@ -64,7 +64,8 @@ class GUI(tk.Frame):
     def give_label():
         return GUI.__l
 
-    #to be further extended
+    #Client server Kommunikation:
+    #Buttons des gegners werden Rot
     def check_for_hit(self, event):             
         event.widget.configure(bg='red')
         event.widget.configure(text='')
@@ -72,7 +73,6 @@ class GUI(tk.Frame):
 
     #Funktion soll checken ob erste beiden gedrückten Buttons für
     #großes Schiff passen
-    #Idee:
 
 class Gamelogic:
 
@@ -94,8 +94,8 @@ class Gamelogic:
             if len(Gamelogic.__buttonspressed) % 2 == 0:
                 #horizontal, Check ob Abstand zwischen den Buttons mit momentaner Schiffslänge übereinstimmt
                 if abs(Gamelogic.__buttonspressed[len(
-                    Gamelogic.__buttonspressed) - 2].data[0] - 
-                            Gamelogic.__buttonspressed[len(
+                    Gamelogic.__buttonspressed) - 2].data[0]
+                    - Gamelogic.__buttonspressed[len(
                     Gamelogic.__buttonspressed) - 1] 
                             .data[0]) + 1 == Gamelogic.__shipcount:
 
@@ -106,15 +106,15 @@ class Gamelogic:
                         print('Abstand passt', Gamelogic.__shipcount)
                         print(Gamelogic.__buttonspressed)
                         Gamelogic.__buttonspressed[len(
-                            Gamelogic.__buttonspressed) - 2].configure(
-                                bg='black')
+                        Gamelogic.__buttonspressed) - 2].configure(
+                        bg='black')
                         Gamelogic.__ships.append(Gamelogic.__buttonspressed[len(
-                            Gamelogic.__buttonspressed) - 2])
+                        Gamelogic.__buttonspressed) - 2])
                         Gamelogic.__buttonspressed[
-                            len(Gamelogic.__buttonspressed) - 1].configure(
-                                bg='black')
+                        len(Gamelogic.__buttonspressed) - 1].configure(
+                        bg='black')
                         Gamelogic.__ships.append(Gamelogic.__buttonspressed[
-                            len(Gamelogic.__buttonspressed) - 1])
+                        len(Gamelogic.__buttonspressed) - 1])
 
                         #Zwischen den beiden äußeren Buttons müssen alle dazwischenliegenden ebenfalls schwarz gemacht werden
                         for x in range(len(GUI.allbuttons)):
@@ -131,7 +131,7 @@ class Gamelogic:
                                         0] < Gamelogic.__buttonspressed[
                                         len(Gamelogic.__buttonspressed) - 1].data[0]:
                                         GUI.allbuttons[x][y].configure(
-                                            bg='black')
+                                        bg='black')
                                         Gamelogic.__ships.append(GUI.allbuttons[x][y])
 
                                     if Gamelogic.__buttonspressed[len(
@@ -140,7 +140,7 @@ class Gamelogic:
                                         0] < Gamelogic.__buttonspressed[
                                         len(Gamelogic.__buttonspressed) - 2].data[0]:
                                         GUI.allbuttons[x][y].configure(
-                                            bg='black')
+                                        bg='black')
                                         Gamelogic.__ships.append(GUI.allbuttons[x][y])
                                         
                         #erst wenn alle Abfragen erfüllt sind wird zum nächsten Schiff übergegangen
@@ -163,12 +163,12 @@ class Gamelogic:
                         print(Gamelogic.__buttonspressed)
                         Gamelogic.__buttonspressed[len(
                         Gamelogic.__buttonspressed) - 2].configure(
-                            bg='black')
+                        bg='black')
                         Gamelogic.__ships.append(Gamelogic.__buttonspressed[
-                            len(Gamelogic.__buttonspressed) - 2])
+                        len(Gamelogic.__buttonspressed) - 2])
                         Gamelogic.__buttonspressed[len(
-                            Gamelogic.__buttonspressed) - 1].configure(
-                            bg='black')
+                        Gamelogic.__buttonspressed) - 1].configure(
+                        bg='black')
                         Gamelogic.__ships.append(
                         Gamelogic.__buttonspressed[
                         len(Gamelogic.__buttonspressed) - 1])
@@ -188,7 +188,7 @@ class Gamelogic:
                                         1] < Gamelogic.__buttonspressed[
                                         len(Gamelogic.__buttonspressed) - 1].data[1]:
                                         GUI.allbuttons[x][y].configure(
-                                            bg='black')
+                                        bg='black')
                                         Gamelogic.__ships.append(GUI.allbuttons[x][y])
 
                                     if Gamelogic.__buttonspressed[
@@ -197,7 +197,7 @@ class Gamelogic:
                                         1] < Gamelogic.__buttonspressed[
                                         len(Gamelogic.__buttonspressed) - 2].data[1]:
                                         GUI.allbuttons[x][y].configure(
-                                            bg='black')
+                                        bg='black')
                                         Gamelogic.__ships.append(GUI.allbuttons[x][y])
 
                         Gamelogic.__shipcount -= 1
@@ -214,8 +214,8 @@ class Gamelogic:
                 #Durch alle Buttons durchiterieren und mit if Abfragen ob Koordinate unter .data mit jener 
                 #von Buttons -1, -2, -3 usw. übereinstimmt   
       
-        else:
-            print("Es wurden bereits alle Schiffe platziert!")
+            else:
+                print("Es wurden bereits alle Schiffe platziert!")
         
 #shipcords[1][1].configure(bg="blue")
 #event.widget.configure(bg='black')
