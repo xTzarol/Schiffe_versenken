@@ -1,5 +1,6 @@
 #erste (zweite) Version des Programms, PEP8 beachten!
 import tkinter as tk
+import socket as sk
 
 class GUI(tk.Frame):
 
@@ -215,7 +216,7 @@ class Gamelogic:
                 #von Buttons -1, -2, -3 usw. übereinstimmt   
       
         else:
-            print("Es wurden bereits alle Schiffe platziert!")
+         print("Es wurden bereits alle Schiffe platziert!")
         
 #shipcords[1][1].configure(bg="blue")
 #event.widget.configure(bg='black')
