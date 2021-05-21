@@ -86,8 +86,8 @@ class Gamelogic:
         #insgesamt muss  User 8 valide, äußere Buttons drücken, um alle Schiffe zu setzen
         if Gamelogic.__shipbuttoncount >= 1:
             Gamelogic.__buttonspressed.append(event.widget)
-            #Zugreifen auf Variable in anderer Klasse:
 
+            #Zugreifen auf Variable in anderer Klasse:
             GUI.give_label().configure(text=str(Gamelogic.__shipcount))
 
             #Check ob 2 neue Buttons dazugekommen sind
@@ -129,7 +129,7 @@ class Gamelogic:
                                         Gamelogic.__buttonspressed) - 2].data[
                                         0] < GUI.allbuttons[x][y].data[
                                         0] < Gamelogic.__buttonspressed[
-                                            len(Gamelogic.__buttonspressed) - 1].data[0]:
+                                        len(Gamelogic.__buttonspressed) - 1].data[0]:
                                         GUI.allbuttons[x][y].configure(
                                             bg='black')
                                         Gamelogic.__ships.append(GUI.allbuttons[x][y])
@@ -138,7 +138,7 @@ class Gamelogic:
                                         Gamelogic.__buttonspressed) - 1].data[
                                         0] < GUI.allbuttons[x][y].data[
                                         0] < Gamelogic.__buttonspressed[
-                                            len(Gamelogic.__buttonspressed) - 2].data[0]:
+                                        len(Gamelogic.__buttonspressed) - 2].data[0]:
                                         GUI.allbuttons[x][y].configure(
                                             bg='black')
                                         Gamelogic.__ships.append(GUI.allbuttons[x][y])
@@ -152,7 +152,7 @@ class Gamelogic:
                         Gamelogic.__buttonspressed) - 2].data[1] - 
                         Gamelogic.__buttonspressed[len(
                         Gamelogic.__buttonspressed) - 1].data[
-                            1]) + 1 == Gamelogic.__shipcount:
+                        1]) + 1 == Gamelogic.__shipcount:
 
                     #x Koordinate muss die gleiche sein, sonst diagonal
                     if Gamelogic.__buttonspressed[len(
@@ -162,7 +162,7 @@ class Gamelogic:
                         print("Abstand passt", Gamelogic.__shipcount)
                         print(Gamelogic.__buttonspressed)
                         Gamelogic.__buttonspressed[len(
-                            Gamelogic.__buttonspressed) - 2].configure(
+                        Gamelogic.__buttonspressed) - 2].configure(
                             bg='black')
                         Gamelogic.__ships.append(Gamelogic.__buttonspressed[
                             len(Gamelogic.__buttonspressed) - 2])
@@ -170,8 +170,8 @@ class Gamelogic:
                             Gamelogic.__buttonspressed) - 1].configure(
                             bg='black')
                         Gamelogic.__ships.append(
-                            Gamelogic.__buttonspressed[
-                            len(Gamelogic.__buttonspressed) - 1])
+                        Gamelogic.__buttonspressed[
+                        len(Gamelogic.__buttonspressed) - 1])
                         
                         #Zwischen den beiden äußeren Buttons müssen alle dazwischenliegenden ebenfalls schwarz gemacht werden
                         for x in range(len(GUI.allbuttons)):
@@ -184,8 +184,8 @@ class Gamelogic:
                                     #Checks ob dazwischenliegender Button zwischen äußeren Buttons liegt
                                     if Gamelogic.__buttonspressed[
                                         len(Gamelogic.__buttonspressed) - 2].data[
-                                            1] < GUI.allbuttons[x][y].data[
-                                            1] < Gamelogic.__buttonspressed[
+                                        1] < GUI.allbuttons[x][y].data[
+                                        1] < Gamelogic.__buttonspressed[
                                         len(Gamelogic.__buttonspressed) - 1].data[1]:
                                         GUI.allbuttons[x][y].configure(
                                             bg='black')
@@ -193,8 +193,8 @@ class Gamelogic:
 
                                     if Gamelogic.__buttonspressed[
                                         len(Gamelogic.__buttonspressed) - 1].data[
-                                            1] < GUI.allbuttons[x][y].data[
-                                            1] < Gamelogic.__buttonspressed[
+                                        1] < GUI.allbuttons[x][y].data[
+                                        1] < Gamelogic.__buttonspressed[
                                         len(Gamelogic.__buttonspressed) - 2].data[1]:
                                         GUI.allbuttons[x][y].configure(
                                             bg='black')
