@@ -26,6 +26,7 @@ class GUI(tk.Frame):
 
         buttonsincol = []
         emptylist = []
+        firstgreybutton = []
 
         for x in range(self.grid_length):
             for y in range(self.grid_length):
@@ -40,6 +41,7 @@ class GUI(tk.Frame):
                            - self.grid_length):
                 l = tk.Label(master=self.f1, bg = 'grey')
                 l.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
+                #if
 
         for x in range(self.grid_length):
             GUI.allbuttons.append(buttonsincol)
@@ -73,6 +75,7 @@ class Gamelogic:
     def place_ships(event):
         #insgesamt muss  User 8 valide, äußere Buttons drücken, um alle Schiffe zu setzen
         if Gamelogic.__shipbuttoncount >= 1:
+            #graues Label mit momentaner Schifflänge beschreiben
             Gamelogic.__buttonspressed.append(event.widget)
             #Check ob 2 neue Buttons dazugekommen sind
             if len(Gamelogic.__buttonspressed) % 2 == 0:
