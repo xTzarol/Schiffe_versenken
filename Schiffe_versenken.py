@@ -1,11 +1,18 @@
 #erste (zweite) Version des Programms, PEP8 beachten!
+from os import replace
 import tkinter as tk
-import socket as sk
+from tkinter import messagebox
+import configparser
+import threading
+import socket
+import sys
+import pickle
 
 class GUI(tk.Frame):
 
     allbuttons = []
     __l = None
+    __enemy_button = None
 
     def __init__(self, master):
         super().__init__(master) 
@@ -67,14 +74,17 @@ class GUI(tk.Frame):
 
     #Client server Kommunikation:
     #Buttons des gegners werden Rot
-    def check_for_hit(self, event):             
+    def check_for_hit(self, event):
+        GUI.__enemy_button = event.widget             
         event.widget.configure(bg='red')
         event.widget.configure(text='')
-        print("Test")
+        Gamelogic.send_shot()
+    
+    def get_enemy_button():
+        return GUI.__enemy_button.data
+        
 
-    #Funktion soll checken ob erste beiden gedrückten Buttons für
-    #großes Schiff passen
-
+#Bugfix dass wenn alle Schiffe platziert wurden tatsächlich richtiger Print erfolgt
 class Gamelogic:
 
     __buttonspressed = []
@@ -86,6 +96,7 @@ class Gamelogic:
     def place_ships(event):
         #insgesamt muss  User 8 valide, äußere Buttons drücken, um alle Schiffe zu setzen
         if Gamelogic.__shipbuttoncount >= 1:
+            #graues Label mit momentaner Schifflänge beschreiben
             Gamelogic.__buttonspressed.append(event.widget)
 
             #Zugreifen auf Variable in anderer Klasse:
@@ -204,37 +215,71 @@ class Gamelogic:
                         Gamelogic.__shipcount -= 1
                         Gamelogic.__shipbuttoncount -= 1
 
+        else:
+            print("Es wurden bereits alle Schiffe platziert!")
+    
+    def send_shot():
+        Network.get_client().send(pickle.dumps(GUI.get_enemy_button()))
 
-                #daten von Knopf der gedrückt wird in Liste schreiben
-                #Idee (x, y) (x, y)...
-                #wenn Länge von Liste%2 --> checken ob Koordinaten der letzten beiden
-                #Knöpfe für Schiffsgröße (__shipcount) richtig liegen (x-__shipcount)
-                #oder (y-__shipcount), sonst letzten Eintrag aus Liste löschen und
-                #print("ungültiges Feld!")
-                #Idee um dazwischenliegende Felder schwarz anzumalen
-                #Durch alle Buttons durchiterieren und mit if Abfragen ob Koordinate unter .data mit jener 
-                #von Buttons -1, -2, -3 usw. übereinstimmt   
-      
-            else:
-                print("Es wurden bereits alle Schiffe platziert!")
+    def handle_shot(shot):
+        for x in range(len(GUI.allbuttons)):
+            for y in range (len(GUI.allbuttons[x])):
+                if (GUI.allbuttons[x][y].data[0] == shot[0]) and (GUI.allbuttons[x][y].data[1] == shot[1]):
+                    GUI.allbuttons[x][y].configure(bg='grey')        
+
+class Network:
+
+    __client = None
+    __HOST_PORT = 0
+    __HOST_ADDRESS = ""
+
+    def read_config():
+        config = configparser.ConfigParser()
+        config.read('serverconfig.ini')
+        Network.__HOST_ADDRESS = config.get('SERVER', 'HOST_ADDRESS')
+        Network.__HOST_PORT = config.get('SERVER', 'HOST_PORT') 
+
+    def connect_to_server():
+        try:
+            Network.__client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            Network.__client.connect((Network.__HOST_ADDRESS, int(Network.__HOST_PORT)))
+            t = threading.Thread(target = Network.receive_message_from_server, args = (Network.__client, ))
+            t.start()
         
-#shipcords[1][1].configure(bg="blue")
-#event.widget.configure(bg='black')
-#event.widget.configure(text='')
+        except:
+            root = tk.Tk()
+            root.withdraw()
+            messagebox.showerror(title="Connection Error", message="Cannot connect to server: " + Network.__HOST_ADDRESS + " on port: " + str(Network.__HOST_PORT))
+            sys.exit()
 
-#unklar ob neue Klasse für Spielablauf empfohlen ist?
-#class Gamelogic:
-    #def check_for_hit(self)
+    def receive_message_from_server(server_connection):
 
-        
+        while True:
+            from_server = server_connection.recv(4096)
+
+            if not from_server : break
+
+            if from_server.startswith("welcome".encode()):
+                if from_server == "welcome1".encode():
+                    #mit Labels machen sodass cmd überflüssig
+                    print("Welcome Player 1. Waiting for Player 2!")
+                elif from_server == "welcome2".encode():
+                    print("Welcome Player 2. The game will start soon!")
+                
+            elif isinstance(pickle.loads(from_server), tuple) == True: 
+                Gamelogic.handle_shot(pickle.loads(from_server))
+
+    def get_client():
+        return Network.__client
+
 if __name__ == '__main__':
 
+    Network.read_config()
+    Network.connect_to_server()
     tk_window = tk.Tk()
     tk_window.title('Schiffe versenken')
     app = GUI(tk_window)
     app.mainloop()
-    Logic = Gamelogic
     
 
-        
 
