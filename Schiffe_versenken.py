@@ -69,8 +69,10 @@ class GUI(tk.Frame):
                 b.data=(x, y)
                 b.bind('<ButtonPress-1>', Gamelogic.place_ships)
 
-    def give_label():
-        return GUI.__l
+        GUI.show_shipsize(4)
+
+    def show_shipsize(size):
+        GUI.__l.configure(text=str(size))
 
     #Client server Kommunikation:
     #Buttons des gegners werden Rot
@@ -89,18 +91,16 @@ class Gamelogic:
 
     __buttonspressed = []
     __ships = []
-    __shipbuttoncount = 8
     __shipcount = 4
+    __shots = []
     
     @staticmethod
     def place_ships(event):
         #insgesamt muss  User 8 valide, äußere Buttons drücken, um alle Schiffe zu setzen
-        if Gamelogic.__shipbuttoncount >= 1:
+
+        if Gamelogic.__shipcount >= 1:
             #graues Label mit momentaner Schifflänge beschreiben
             Gamelogic.__buttonspressed.append(event.widget)
-
-            #Zugreifen auf Variable in anderer Klasse:
-            GUI.give_label().configure(text=str(Gamelogic.__shipcount))
 
             #Check ob 2 neue Buttons dazugekommen sind
             if len(Gamelogic.__buttonspressed) % 2 == 0:
@@ -110,6 +110,7 @@ class Gamelogic:
                     - Gamelogic.__buttonspressed[len(
                     Gamelogic.__buttonspressed) - 1] 
                             .data[0]) + 1 == Gamelogic.__shipcount:
+                    GUI.show_shipsize(Gamelogic.__shipcount - 1)
 
                     #y Koordinate muss die gleiche sein, sonst diagonal
                     if Gamelogic.__buttonspressed[len(
@@ -157,7 +158,6 @@ class Gamelogic:
                                         
                         #erst wenn alle Abfragen erfüllt sind wird zum nächsten Schiff übergegangen
                         Gamelogic.__shipcount -= 1
-                        Gamelogic.__shipbuttoncount -= 1
 
                 #vertical, Check ob Abstand zwischen den Buttons mit momentaner Schiffslänge übereinstimmt
                 if abs(Gamelogic.__buttonspressed[len(
@@ -203,21 +203,21 @@ class Gamelogic:
                                         bg='black')
                                         Gamelogic.__ships.append(GUI.allbuttons[x][y])
 
-                                    if Gamelogic.__buttonspressed[
-                                        len(Gamelogic.__buttonspressed) - 1].data[
-                                        1] < GUI.allbuttons[x][y].data[
-                                        1] < Gamelogic.__buttonspressed[
-                                        len(Gamelogic.__buttonspressed) - 2].data[1]:
-                                        GUI.allbuttons[x][y].configure(
-                                        bg='black')
+                                    if Gamelogic.__buttonspressed[len(Gamelogic.__buttonspressed) - 1].data[1] < GUI.allbuttons[x][y].data[1] < Gamelogic.__buttonspressed[len(Gamelogic.__buttonspressed) - 2].data[1]:
+                                        GUI.allbuttons[x][y].configure(bg='black')
                                         Gamelogic.__ships.append(GUI.allbuttons[x][y])
-
+                                        
                         Gamelogic.__shipcount -= 1
-                        Gamelogic.__shipbuttoncount -= 1
 
         else:
             print("Es wurden bereits alle Schiffe platziert!")
     
+    def give_shipsize():
+        return Gamelogic.__shipcount
+
+    def send_ready():
+        Network.get_client().send(pickle.dumps("ready"))
+
     def send_shot():
         Network.get_client().send(pickle.dumps(GUI.get_enemy_button()))
 
@@ -225,7 +225,8 @@ class Gamelogic:
         for x in range(len(GUI.allbuttons)):
             for y in range (len(GUI.allbuttons[x])):
                 if (GUI.allbuttons[x][y].data[0] == shot[0]) and (GUI.allbuttons[x][y].data[1] == shot[1]):
-                    GUI.allbuttons[x][y].configure(bg='grey')        
+                    GUI.allbuttons[x][y].configure(bg='grey')
+                    Gamelogic.__shots.append(GUI.allbuttons[x][y])      
 
 class Network:
 
@@ -257,7 +258,8 @@ class Network:
         while True:
             from_server = server_connection.recv(4096)
 
-            if not from_server : break
+            if not from_server:
+                break   
 
             if from_server.startswith("welcome".encode()):
                 if from_server == "welcome1".encode():
@@ -265,9 +267,12 @@ class Network:
                     print("Welcome Player 1. Waiting for Player 2!")
                 elif from_server == "welcome2".encode():
                     print("Welcome Player 2. The game will start soon!")
-                
-            elif isinstance(pickle.loads(from_server), tuple) == True: 
-                Gamelogic.handle_shot(pickle.loads(from_server))
+                    
+                elif isinstance(pickle.loads(from_server), tuple) == True: 
+                    Gamelogic.handle_shot(pickle.loads(from_server))
+
+            if from_server == "start_game":
+                return 
 
     def get_client():
         return Network.__client

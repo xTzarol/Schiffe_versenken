@@ -72,7 +72,10 @@ if __name__ == '__main__':
 
     Network.read_config()
     Network.start_server()
-    ctypes.windll.kernel32.SetConsoleTitleW("Schiffe versenken Server on {}:{}".format(Network.print_server()[0], Network.print_server()[1]))
+    if sys.platform == 'win32':
+        ctypes.windll.kernel32.SetConsoleTitleW("Schiffe versenken Server on {}:{}".format(Network.print_server()[0], Network.print_server()[1]))
+    elif sys.platform == 'linux':
+        print(f'\33]0;{title}\a', end='', flush=True)
     while True:
         if Network.get_number_of_clients() == 2:
             Network.receive_shot()
