@@ -1,5 +1,6 @@
 #erste (zweite) Version des Programms, PEP8 beachten!
 from os import replace
+from re import I
 import tkinter as tk
 from tkinter import messagebox
 import configparser
@@ -11,6 +12,7 @@ import pickle
 class GUI(tk.Frame):
 
     allbuttons = []
+    ownbuttons = []
     __l = None
     __enemy_button = None
 
@@ -38,12 +40,15 @@ class GUI(tk.Frame):
         emptylist = []
 
         for x in range(self.grid_length):
+            GUI.allbuttons.append(buttonsincol)
+            buttonsincol = emptylist
             for y in range(self.grid_length):
                 b = tk.Button(master=self.f1, text='{}/{}'.format(x,y),
-                              bg='white')
+                              bg='white', state = 'disabled')
                 b.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
                 b.data=(x, y)
                 b.bind("<ButtonPress-1>", self.check_for_hit)
+                buttonsincol.append(b)
 
         for x in range(self.grid_length):
             for y in range(self.grid_length, self.grid_height
@@ -52,12 +57,21 @@ class GUI(tk.Frame):
                 if y == 10 and x == 0:
                     GUI.__l = tk.Label(master=self.f1, bg = 'grey')
                     GUI.__l.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
+
+                #Möglichkeit finden, um ein großes Label zu haben, statt mehreren kleinen damit Textkonfiguration funktioniert ohne die Größe des Grids zu verändern
+                #großes Label soll auch Informationen wie Verbunden usw beinhalten
+
+                #elif y == 10 and x == 1:
+                    #l = tk.Label(master=self.f1, bg = 'grey', text = 'aktuelle Schiffslänge')
+                    #l.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
+
                 else:
-                    GUI.__l = tk.Label(master=self.f1, bg = 'grey')
-                    GUI.__l.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
+                    l = tk.Label(master=self.f1, bg = 'grey')
+                    l.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
     
         
         for x in range(self.grid_length):
+            GUI.ownbuttons.append(buttonsincol)
             GUI.allbuttons.append(buttonsincol)
             buttonsincol = emptylist
             for y in range(self.grid_length + 1, self.grid_height):
@@ -74,31 +88,34 @@ class GUI(tk.Frame):
     def show_shipsize(size):
         GUI.__l.configure(text=str(size))
 
-    #Client server Kommunikation:
     #Buttons des gegners werden Rot
     def check_for_hit(self, event):
-        GUI.__enemy_button = event.widget             
-        event.widget.configure(bg='red')
-        event.widget.configure(text='')
-        Gamelogic.send_shot()
+        if event.widget['state'] == 'normal':
+            GUI.__enemy_button = event.widget             
+            event.widget.configure(bg='red')
+            event.widget.configure(text='')
+            Gamelogic.send_shot()
+
+        else:
+            pass
     
     def get_enemy_button():
         return GUI.__enemy_button.data
         
-
-#Bugfix dass wenn alle Schiffe platziert wurden tatsächlich richtiger Print erfolgt
 class Gamelogic:
 
     __buttonspressed = []
     __ships = []
-    __shipcount = 4
     __shots = []
+    __shipcount = 4
+    enemy_ready = False
     
     @staticmethod
     def place_ships(event):
         #insgesamt muss  User 8 valide, äußere Buttons drücken, um alle Schiffe zu setzen
 
         if Gamelogic.__shipcount >= 1:
+
             #graues Label mit momentaner Schifflänge beschreiben
             Gamelogic.__buttonspressed.append(event.widget)
 
@@ -109,8 +126,7 @@ class Gamelogic:
                     Gamelogic.__buttonspressed) - 2].data[0]
                     - Gamelogic.__buttonspressed[len(
                     Gamelogic.__buttonspressed) - 1] 
-                            .data[0]) + 1 == Gamelogic.__shipcount:
-                    GUI.show_shipsize(Gamelogic.__shipcount - 1)
+                            .data[0]) + 1 == Gamelogic.__shipcount:                      
 
                     #y Koordinate muss die gleiche sein, sonst diagonal
                     if Gamelogic.__buttonspressed[len(
@@ -130,34 +146,35 @@ class Gamelogic:
                         len(Gamelogic.__buttonspressed) - 1])
 
                         #Zwischen den beiden äußeren Buttons müssen alle dazwischenliegenden ebenfalls schwarz gemacht werden
-                        for x in range(len(GUI.allbuttons)):
-                            for y in range (len(GUI.allbuttons[x])):
+                        for x in range(len(GUI.ownbuttons)):
+                            for y in range (len(GUI.ownbuttons[x])):
 
                                 #Check ob dazwischenliegender Button auf gleicher y Koordinate liegt wie äußere Buttons
-                                if GUI.allbuttons[x][y].data[1] == Gamelogic.__buttonspressed[
+                                if GUI.ownbuttons[x][y].data[1] == Gamelogic.__buttonspressed[
                                     len(Gamelogic.__buttonspressed) - 1].data[1]:
 
                                     #Checks ob dazwischenliegender Button zwischen äußeren Buttons liegt
                                     if Gamelogic.__buttonspressed[len(
                                         Gamelogic.__buttonspressed) - 2].data[
-                                        0] < GUI.allbuttons[x][y].data[
+                                        0] < GUI.ownbuttons[x][y].data[
                                         0] < Gamelogic.__buttonspressed[
                                         len(Gamelogic.__buttonspressed) - 1].data[0]:
-                                        GUI.allbuttons[x][y].configure(
+                                        GUI.ownbuttons[x][y].configure(
                                         bg='black')
-                                        Gamelogic.__ships.append(GUI.allbuttons[x][y])
+                                        Gamelogic.__ships.append(GUI.ownbuttons[x][y])
 
                                     if Gamelogic.__buttonspressed[len(
                                         Gamelogic.__buttonspressed) - 1].data[
-                                        0] < GUI.allbuttons[x][y].data[
+                                        0] < GUI.ownbuttons[x][y].data[
                                         0] < Gamelogic.__buttonspressed[
                                         len(Gamelogic.__buttonspressed) - 2].data[0]:
-                                        GUI.allbuttons[x][y].configure(
+                                        GUI.ownbuttons[x][y].configure(
                                         bg='black')
-                                        Gamelogic.__ships.append(GUI.allbuttons[x][y])
+                                        Gamelogic.__ships.append(GUI.ownbuttons[x][y])
                                         
                         #erst wenn alle Abfragen erfüllt sind wird zum nächsten Schiff übergegangen
                         Gamelogic.__shipcount -= 1
+                        GUI.show_shipsize(Gamelogic.__shipcount)
 
                 #vertical, Check ob Abstand zwischen den Buttons mit momentaner Schiffslänge übereinstimmt
                 if abs(Gamelogic.__buttonspressed[len(
@@ -186,29 +203,38 @@ class Gamelogic:
                         len(Gamelogic.__buttonspressed) - 1])
                         
                         #Zwischen den beiden äußeren Buttons müssen alle dazwischenliegenden ebenfalls schwarz gemacht werden
-                        for x in range(len(GUI.allbuttons)):
-                            for y in range (len(GUI.allbuttons[x])):
+                        for x in range(len(GUI.ownbuttons)):
+                            for y in range (len(GUI.ownbuttons[x])):
 
                                 #Check ob dazwischenliegender Button auf gleicher x Koordinate liegt wie äußere Buttons
-                                if GUI.allbuttons[x][y].data[0] == Gamelogic.__buttonspressed[
+                                if GUI.ownbuttons[x][y].data[0] == Gamelogic.__buttonspressed[
                                     len(Gamelogic.__buttonspressed) - 1].data[0]:
 
                                     #Checks ob dazwischenliegender Button zwischen äußeren Buttons liegt
                                     if Gamelogic.__buttonspressed[
                                         len(Gamelogic.__buttonspressed) - 2].data[
-                                        1] < GUI.allbuttons[x][y].data[
+                                        1] < GUI.ownbuttons[x][y].data[
                                         1] < Gamelogic.__buttonspressed[
                                         len(Gamelogic.__buttonspressed) - 1].data[1]:
-                                        GUI.allbuttons[x][y].configure(
+                                        GUI.ownbuttons[x][y].configure(
                                         bg='black')
-                                        Gamelogic.__ships.append(GUI.allbuttons[x][y])
+                                        Gamelogic.__ships.append(GUI.ownbuttons[x][y])
 
-                                    if Gamelogic.__buttonspressed[len(Gamelogic.__buttonspressed) - 1].data[1] < GUI.allbuttons[x][y].data[1] < Gamelogic.__buttonspressed[len(Gamelogic.__buttonspressed) - 2].data[1]:
-                                        GUI.allbuttons[x][y].configure(bg='black')
-                                        Gamelogic.__ships.append(GUI.allbuttons[x][y])
+                                    if Gamelogic.__buttonspressed[len(Gamelogic.__buttonspressed) - 1].data[1] < GUI.ownbuttons[x][y].data[1] < Gamelogic.__buttonspressed[len(Gamelogic.__buttonspressed) - 2].data[1]:
+                                        GUI.ownbuttons[x][y].configure(bg='black')
+                                        Gamelogic.__ships.append(GUI.ownbuttons[x][y])
                                         
                         Gamelogic.__shipcount -= 1
+                        GUI.show_shipsize(Gamelogic.__shipcount)
 
+        if Gamelogic.__shipcount == 0:
+            #Gamelogic.send_ready()
+            #if Gamelogic.enemy_ready == True:
+            for x in range(len(GUI.allbuttons)):
+                for y in range (len(GUI.allbuttons[x])): 
+                    GUI.allbuttons[x][y].configure(state = 'normal')
+                    Gamelogic.__shipcount -= 1
+  
         else:
             print("Es wurden bereits alle Schiffe platziert!")
     
@@ -222,11 +248,11 @@ class Gamelogic:
         Network.get_client().send(pickle.dumps(GUI.get_enemy_button()))
 
     def handle_shot(shot):
-        for x in range(len(GUI.allbuttons)):
-            for y in range (len(GUI.allbuttons[x])):
-                if (GUI.allbuttons[x][y].data[0] == shot[0]) and (GUI.allbuttons[x][y].data[1] == shot[1]):
-                    GUI.allbuttons[x][y].configure(bg='grey')
-                    Gamelogic.__shots.append(GUI.allbuttons[x][y])      
+        for x in range(len(GUI.ownbuttons)):
+            for y in range (len(GUI.ownbuttons[x])):
+                if (GUI.ownbuttons[x][y].data[0] == shot[0]) and (GUI.ownbuttons[x][y].data[1] == shot[1]):
+                    GUI.ownbuttons[x][y].configure(bg='grey')
+                    Gamelogic.__shots.append(GUI.ownbuttons[x][y])      
 
 class Network:
 
@@ -268,11 +294,11 @@ class Network:
                 elif from_server == "welcome2".encode():
                     print("Welcome Player 2. The game will start soon!")
                     
-                elif isinstance(pickle.loads(from_server), tuple) == True: 
+            elif isinstance(pickle.loads(from_server), tuple) == True:
                     Gamelogic.handle_shot(pickle.loads(from_server))
 
-            if from_server == "start_game":
-                return 
+            elif from_server == "ready":
+                Gamelogic.enemy_ready == True
 
     def get_client():
         return Network.__client

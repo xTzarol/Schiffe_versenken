@@ -55,6 +55,9 @@ class Network:
     def send_shot(shot):
         Network.__clients[1].send(pickle.dumps(shot))
 
+    def receive_ready():
+        return
+
     def print_server():
         server_stats = []
         server_stats.append(Network.__HOST_ADDRESS)
