@@ -7,6 +7,32 @@ import sys
 import ctypes
 import pickle
 
+class GUI(tk.Frame):
+
+    labels = []
+
+    def __init__(self, master):
+        super().__init__(master) 
+        master.geometry('200x250') 
+        #frame
+        self.f1 = tk.Frame(master=master)
+        self.f1.pack(fill=tk.BOTH, expand=True)
+        self.grid_length = 1
+        self.grid_height = 3
+        self.create_board()
+
+        for x in range(self.grid_length):
+            self.f1.columnconfigure(x, weight=1)
+        for y in range(self.grid_height):
+            self.f1.rowconfigure(y, weight=1)
+    
+    def create_board(self):
+        for x in range(self.grid_length):
+            for y in range(self.grid_height):
+                l = tk.Label(master=self.f1, bg = 'white', text = "hello")
+                l.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
+                GUI.labels.append(l)
+    
 class Network:
 
     #clients list is for remembering to which player send which information at a specific time --> to alternate between the two players
@@ -14,6 +40,7 @@ class Network:
     __HOST_PORT = 0
     __HOST_ADDRESS = ""
     __clients = []
+    __players_connected = False
    
     def read_config():
         config = configparser.ConfigParser()
@@ -25,7 +52,7 @@ class Network:
         Network.__server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         Network.__server.bind((Network.__HOST_ADDRESS, int(Network.__HOST_PORT)))
         Network.__server.listen(2)
-        print("Server started!")
+        GUI.labels[0].configure(text = 'Server started!', fg = 'black')
         t = threading.Thread(target = Network.accept_clients, args = (Network.__server, ))
         t.start()
         
@@ -45,18 +72,25 @@ class Network:
         else:
             client_connection.send("welcome2".encode())
             print("Connection from", client_connection.getpeername(),"successful!")
+            Network.__players_connected = True
+
+    def tell_if_ready():
+        return Network.__players_connected
 
 #Einfügen dass Spieler der gerade an der Reihe ist übergeben wird damit auf richtige Verbindung gehorcht bzw. von richtiger Verbindung empfangen wird
-    def receive_shot():
-        shot = list(pickle.loads(Network.__clients[0].recv(4096)))
-        shot[1] += 11
-        Network.send_shot(tuple(shot))
+    def receive_shot(index):
+        connection = Network.__clients[index]
+        print(connection)
+        while True:  
+            shot = list(pickle.loads(connection.recv(4096)))
+            shot[1] += 11
+            Network.send_shot(tuple(shot), index)
 
-    def send_shot(shot):
-        Network.__clients[1].send(pickle.dumps(shot))
-
-    def receive_ready():
-        return
+    def send_shot(shot, player):
+        if player == 0:
+            Network.__clients[1].send(pickle.dumps(shot))
+        if player == 1:
+            Network.__clients[0].send(pickle.dumps(shot))            
 
     def print_server():
         server_stats = []
@@ -73,15 +107,32 @@ class Network:
 
 if __name__ == '__main__':
 
+    def create_gui():
+        tk_window = tk.Tk()
+        tk_window.title('Schiffe versenken Server')
+        app = GUI(tk_window)
+        app.mainloop()
+
+    def receive():
+        while True:
+            if Network.tell_if_ready() == True:
+                for i in range(2):
+                    t = threading.Thread(target = Network.receive_shot, args = (i, ))
+                    t.start()
+                break
+
+    t = threading.Thread(target = create_gui)
+    t.start()
+
+    t = threading.Thread(target = receive)
+    t.start()
+
+    time.sleep(1)
     Network.read_config()
     Network.start_server()
-    if sys.platform == 'win32':
-        ctypes.windll.kernel32.SetConsoleTitleW("Schiffe versenken Server on {}:{}".format(Network.print_server()[0], Network.print_server()[1]))
-    elif sys.platform == 'linux':
-        print(f'\33]0;{title}\a', end='', flush=True)
-    while True:
-        if Network.get_number_of_clients() == 2:
-            Network.receive_shot()
+
+    
+
             
     #tk_window = tk.Tk()
     #tk_window.title('Schiffe versenken Server')
