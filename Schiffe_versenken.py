@@ -1,6 +1,4 @@
-#erste (zweite) Version des Programms, PEP8 beachten!
-from os import replace
-from re import I
+#PEP8 beachten!
 import tkinter as tk
 from tkinter import messagebox
 import configparser
@@ -15,6 +13,7 @@ class GUI(tk.Frame):
     ownbuttons = []
     __l = None
     __enemy_button = None
+    __ownshots = []
 
     def __init__(self, master):
         super().__init__(master) 
@@ -46,7 +45,7 @@ class GUI(tk.Frame):
                 b = tk.Button(master=self.f1, bg = 'deep sky blue', fg = 'deep sky blue', state = 'disabled')
                 b.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
                 b.data=(x, y)
-                b.bind("<ButtonPress-1>", self.check_for_hit)
+                b.bind("<ButtonPress-1>", self.check_for_valid_shot)
                 buttonsincol.append(b)
                 b.grid_remove()
 
@@ -76,7 +75,7 @@ class GUI(tk.Frame):
             buttonsincol = emptylist
             for y in range(self.grid_length + 1, self.grid_height):
                 b = tk.Button(master=self.f1,
-                              bg='deep sky blue', fg = 'deep sky blue')
+                              bg = 'deep sky blue', fg = 'deep sky blue')
                 b.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
                 buttonsincol.append(b)
                 b.data=(x, y)
@@ -88,26 +87,23 @@ class GUI(tk.Frame):
         GUI.__l.configure(text=str(size))
 
     #Buttons des gegners werden Rot
-    def check_for_hit(self, event):
+    def check_for_valid_shot(self, event):
         if event.widget['state'] == 'normal':
-            GUI.__enemy_button = event.widget             
-            event.widget.configure(bg='red')
-            event.widget.configure(text='')
-            Gamelogic.send_shot()
-
-        else:
-            pass
-    
-    def get_enemy_button():
-        return GUI.__enemy_button.data
+            if Gamelogic.get_enemy_turn() == False:
+                if event.widget not in GUI.__ownshots:
+                    event.widget.configure(bg='red')
+                    event.widget.configure(text='')
+                    GUI.__ownshots.append(event.widget)
+                    Gamelogic.send_shot(event.widget.data)
         
 class Gamelogic:
 
     __buttonspressed = []
     __ships = []
-    __shots = []
+    __enemyshots = []
     __shipcount = 4
     enemy_ready = False
+    __enemies_turn = True
     
     @staticmethod
     def place_ships(event):
@@ -142,8 +138,7 @@ class Gamelogic:
                         Gamelogic.__buttonspressed[
                         len(Gamelogic.__buttonspressed) - 1].configure(
                         bg = 'black', fg = 'black')
-                        Gamelogic.__ships.append(Gamelogic.__buttonspressed[
-                        len(Gamelogic.__buttonspressed) - 1])
+                        Gamelogic.__ships.append(Gamelogic.__buttonspressed[len(Gamelogic.__buttonspressed) - 1])
 
                         #Zwischen den beiden äußeren Buttons müssen alle dazwischenliegenden ebenfalls schwarz gemacht werden
                         for x in range(len(GUI.ownbuttons)):
@@ -211,13 +206,8 @@ class Gamelogic:
                                     len(Gamelogic.__buttonspressed) - 1].data[0]:
 
                                     #Checks ob dazwischenliegender Button zwischen äußeren Buttons liegt
-                                    if Gamelogic.__buttonspressed[
-                                        len(Gamelogic.__buttonspressed) - 2].data[
-                                        1] < GUI.ownbuttons[x][y].data[
-                                        1] < Gamelogic.__buttonspressed[
-                                        len(Gamelogic.__buttonspressed) - 1].data[1]:
-                                        GUI.ownbuttons[x][y].configure(
-                                        bg = 'black', fg = 'black')
+                                    if Gamelogic.__buttonspressed[len(Gamelogic.__buttonspressed) - 2].data[1] < GUI.ownbuttons[x][y].data[1] < Gamelogic.__buttonspressed[len(Gamelogic.__buttonspressed) - 1].data[1]:
+                                        GUI.ownbuttons[x][y].configure(bg = 'black', fg = 'black')
                                         Gamelogic.__ships.append(GUI.ownbuttons[x][y])
 
                                     if Gamelogic.__buttonspressed[len(Gamelogic.__buttonspressed) - 1].data[1] < GUI.ownbuttons[x][y].data[1] < Gamelogic.__buttonspressed[len(Gamelogic.__buttonspressed) - 2].data[1]:
@@ -234,7 +224,8 @@ class Gamelogic:
                     for y in range (len(GUI.allbuttons[x])):
                         GUI.allbuttons[x][y].grid() 
                         GUI.allbuttons[x][y].configure(state = 'normal')
-                        Gamelogic.__shipcount -= 1
+                Gamelogic.__shipcount -= 1
+                Gamelogic.__ships = list(set(Gamelogic.__ships))
   
         if Gamelogic.__shipcount < 0:
             print("Es wurden bereits alle Schiffe platziert!")
@@ -245,15 +236,40 @@ class Gamelogic:
     def send_ready():
         Network.get_client().send(pickle.dumps("ready"))
 
-    def send_shot():
-        Network.get_client().send(pickle.dumps(GUI.get_enemy_button()))
+    def send_shot(data):
+        if Gamelogic.__enemies_turn == False:
+            Network.get_client().send(pickle.dumps(data))
+            Gamelogic.__enemies_turn = True
+    
+    def send_hit():
+        Network.get_client().send(pickle.dumps("hit"))
+        Gamelogic.set_enemy_turn_to_True()
+
+    def check_for_hit(shot):
+        for i in range(len(Gamelogic.__ships)):
+            if (Gamelogic.__ships[i].data[0] == shot[0]) and (Gamelogic.__ships[i].data[1] == shot[1]):
+                Gamelogic.send_hit()
 
     def handle_shot(shot):
         for x in range(len(GUI.ownbuttons)):
             for y in range (len(GUI.ownbuttons[x])):
                 if (GUI.ownbuttons[x][y].data[0] == shot[0]) and (GUI.ownbuttons[x][y].data[1] == shot[1]):
-                    GUI.ownbuttons[x][y].configure(bg='grey')
-                    Gamelogic.__shots.append(GUI.ownbuttons[x][y])      
+                    GUI.ownbuttons[x][y].configure(bg = 'grey')
+                    Gamelogic.__enemyshots.append(GUI.ownbuttons[x][y])
+                    Gamelogic.set_enemy_turn_to_False()
+                    Gamelogic.check_for_hit(shot)
+                    print(Gamelogic.__ships, Gamelogic.__enemyshots)
+                    if Gamelogic.__ships == Gamelogic.__enemyshots:
+                        print("Das Spiel ist vorbei, Gegner hat gewonnen!")
+
+    def get_enemy_turn():
+        return Gamelogic.__enemies_turn
+
+    def set_enemy_turn_to_False():
+        Gamelogic.__enemies_turn = False
+
+    def set_enemy_turn_to_True():
+        Gamelogic.__enemies_turn = True      
 
 class Network:
 
@@ -292,14 +308,18 @@ class Network:
                 if from_server == "welcome1".encode():
                     #mit Labels machen sodass cmd überflüssig
                     print("Welcome Player 1. Waiting for Player 2!")
+                    Gamelogic.set_enemy_turn_to_False()
                 elif from_server == "welcome2".encode():
                     print("Welcome Player 2. The game will start soon!")
                     
             elif isinstance(pickle.loads(from_server), tuple) == True:
-                    Gamelogic.handle_shot(pickle.loads(from_server))
+                Gamelogic.handle_shot(pickle.loads(from_server))
 
-            elif from_server == "ready":
+            elif pickle.loads(from_server) == "ready":
                 Gamelogic.enemy_ready = True
+
+            elif pickle.loads(from_server) == "hit":
+                Gamelogic.set_enemy_turn_to_False()
 
     def get_client():
         return Network.__client

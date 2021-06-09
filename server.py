@@ -3,8 +3,6 @@ import socket
 import threading
 import time
 import configparser
-import sys
-import ctypes
 import pickle
 
 class GUI(tk.Frame):
@@ -64,7 +62,7 @@ class Network:
             t = threading.Thread(target = Network.send_startup_message, args = (client, address))
             t.start()
 
-    def send_startup_message(client_connection, client_ip_address):
+    def send_startup_message(client_connection, ip_address):
 
         if len(Network.__clients) < 2:
             client_connection.send("welcome1".encode())
@@ -77,20 +75,34 @@ class Network:
     def tell_if_ready():
         return Network.__players_connected
 
-#Einfügen dass Spieler der gerade an der Reihe ist übergeben wird damit auf richtige Verbindung gehorcht bzw. von richtiger Verbindung empfangen wird
-    def receive_shot(index):
-        connection = Network.__clients[index]
-        print(connection)
-        while True:  
-            shot = list(pickle.loads(connection.recv(4096)))
-            shot[1] += 11
-            Network.send_shot(tuple(shot), index)
+    def receive_message_from_client(index):
+        
+        while True:
+            from_client = Network.__clients[index].recv(4096)
 
-    def send_shot(shot, player):
+            if not from_client:
+                break   
+
+            elif pickle.loads(from_client) == "ready":
+                Network.send_data_to_enemy("ready", index)
+                    
+            elif isinstance(pickle.loads(from_client), tuple) == True:
+                Network.convert_shot(pickle.loads(from_client), index)
+
+            elif pickle.loads(from_client) == "hit":
+                Network.send_data_to_enemy("hit", index)
+
+#Einfügen dass Spieler der gerade an der Reihe ist übergeben wird damit auf richtige Verbindung gehorcht bzw. von richtiger Verbindung empfangen wird
+    def convert_shot(shot, index):
+        shot = list(shot)
+        shot[1] += 11
+        Network.send_data_to_enemy(tuple(shot), index)
+
+    def send_data_to_enemy(data, player):
         if player == 0:
-            Network.__clients[1].send(pickle.dumps(shot))
+            Network.__clients[1].send(pickle.dumps(data))
         if player == 1:
-            Network.__clients[0].send(pickle.dumps(shot))            
+            Network.__clients[0].send(pickle.dumps(data))
 
     def print_server():
         server_stats = []
@@ -100,10 +112,6 @@ class Network:
     
     def get_number_of_clients():
         return len(Network.__clients)
-
-#class Gamelogic:
-
-    #def serverlogic()     
 
 if __name__ == '__main__':
 
@@ -117,22 +125,19 @@ if __name__ == '__main__':
         while True:
             if Network.tell_if_ready() == True:
                 for i in range(2):
-                    t = threading.Thread(target = Network.receive_shot, args = (i, ))
+                    t = threading.Thread(target = Network.receive_message_from_client, args = (i, ))
                     t.start()
                 break
 
     t = threading.Thread(target = create_gui)
     t.start()
 
-    t = threading.Thread(target = receive)
-    t.start()
-
     time.sleep(1)
     Network.read_config()
     Network.start_server()
 
-    
-
+    t = threading.Thread(target = receive)
+    t.start()  
             
     #tk_window = tk.Tk()
     #tk_window.title('Schiffe versenken Server')
