@@ -23,14 +23,14 @@ class GUI(tk.Frame):
         self.f1.pack(fill=tk.BOTH, expand=True)
         #game board size
         self.grid_length = 10
-        self.grid_height = 2 * self.grid_length + 1
+        self.grid_height = (2 * self.grid_length) + 1
         self.create_board()
 
         #make the grid expandable
         for x in range(self.grid_length):
-            self.f1.columnconfigure(x, weight=1)
+            self.f1.columnconfigure(x, weight = 1)
         for y in range(self.grid_height):
-            self.f1.rowconfigure(y, weight=1)
+            self.f1.rowconfigure(y, weight = 1)
 
     #Create playing field (opponent - middle line - own field)
     def create_board(self):
@@ -46,28 +46,11 @@ class GUI(tk.Frame):
                 b.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
                 b.data=(x, y)
                 b.bind("<ButtonPress-1>", self.check_for_valid_shot)
-                buttonsincol.append(b)
                 b.grid_remove()
+                buttonsincol.append(b)
 
-        for x in range(self.grid_length):
-            for y in range(self.grid_length, self.grid_height
-                           - self.grid_length):
-        
-                if y == 10 and x == 0:
-                    GUI.__l = tk.Label(master=self.f1, bg = 'grey')
-                    GUI.__l.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
-
-                #Möglichkeit finden, um ein großes Label zu haben, statt mehreren kleinen damit Textkonfiguration funktioniert ohne die Größe des Grids zu verändern
-                #großes Label soll auch Informationen wie Verbunden usw beinhalten
-
-                #elif y == 10 and x == 1:
-                    #l = tk.Label(master=self.f1, bg = 'grey', text = 'aktuelle Schiffslänge')
-                    #l.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
-
-                else:
-                    l = tk.Label(master=self.f1, bg = 'grey')
-                    l.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
-    
+        GUI.__l = tk.Label(master=self.f1, bg = 'grey')
+        GUI.__l.grid(row=10, columnspan = 10, sticky=tk.N+tk.S+tk.E+tk.W)
         
         for x in range(self.grid_length):
             GUI.ownbuttons.append(buttonsincol)
@@ -77,25 +60,54 @@ class GUI(tk.Frame):
                 b = tk.Button(master=self.f1,
                               bg = 'deep sky blue', fg = 'deep sky blue')
                 b.grid(row=y, column=x, sticky=tk.N+tk.S+tk.E+tk.W)
-                buttonsincol.append(b)
                 b.data=(x, y)
                 b.bind('<ButtonPress-1>', Gamelogic.place_ships)
+                buttonsincol.append(b)
 
         GUI.show_shipsize(4)
 
     def show_shipsize(size):
-        GUI.__l.configure(text=str(size))
+        if size > 0:
+            GUI.__l.configure(text = str(size))
+        else:
+            GUI.__l.configure(text = '')
+    
+    def tell_winner(player):
+        for x in range(len(GUI.allbuttons)):
+            for y in range (len(GUI.allbuttons[x])):
+                GUI.allbuttons[x][y].grid_remove() 
+                GUI.allbuttons[x][y].configure(state = 'disabled')
+        
+        if player == 1:
+
+            GUI.__l.configure(text = 'You have won!', bg = 'lawn green')
+        
+        else:
+            
+            GUI.__l.configure(text = 'You have lost!', bg = 'red2')
 
     #Buttons des gegners werden Rot
     def check_for_valid_shot(self, event):
         if event.widget['state'] == 'normal':
             if Gamelogic.get_enemy_turn() == False:
                 if event.widget not in GUI.__ownshots:
-                    event.widget.configure(bg='red')
-                    event.widget.configure(text='')
+                    event.widget.configure(bg = 'grey')
+                    event.widget.configure(text = '')
                     GUI.__ownshots.append(event.widget)
-                    Gamelogic.send_shot(event.widget.data)
-        
+                    shot = list(event.widget.data)
+                    shot.insert(0, 's')
+                    Gamelogic.send_shot(tuple(shot))
+
+    def mark_enemy_hit():
+        GUI.__ownshots[len(GUI.__ownshots) - 1].configure(bg = 'red')
+        for x in range(len(GUI.allbuttons)):
+            for y in range (len(GUI.allbuttons[x])):
+                if -1 <= GUI.allbuttons[x][y].data[0] - GUI.__ownshots[len(GUI.__ownshots) - 1].data[0] <= 1 and -1 <= GUI.allbuttons[x][y].data[1] - GUI.__ownshots[len(GUI.__ownshots) - 1].data[1] <= 1 and GUI.__ownshots[len(GUI.__ownshots) - 1] != list(GUI.allbuttons[x][y].data) and GUI.allbuttons[x][y] not in Gamelogic.nearby_ships:
+                    GUI.allbuttons[x][y].configure(bg = 'grey')
+
+    def mark_own_hit(ship):
+        ship.configure(bg = 'red')
+
 class Gamelogic:
 
     __buttonspressed = []
@@ -104,6 +116,9 @@ class Gamelogic:
     __shipcount = 4
     enemy_ready = False
     __enemies_turn = True
+    __winner = False
+    __sent_nearby_ships = []
+    nearby_ships = []
     
     @staticmethod
     def place_ships(event):
@@ -128,8 +143,6 @@ class Gamelogic:
                     if Gamelogic.__buttonspressed[len(
                         Gamelogic.__buttonspressed) - 2].data[1] == Gamelogic.__buttonspressed[
                         len(Gamelogic.__buttonspressed) - 1].data[1]:
-                        print('Abstand passt', Gamelogic.__shipcount)
-                        print(Gamelogic.__buttonspressed)
                         Gamelogic.__buttonspressed[len(
                         Gamelogic.__buttonspressed) - 2].configure(
                         bg = 'black', fg = 'black')
@@ -142,7 +155,7 @@ class Gamelogic:
 
                         #Zwischen den beiden äußeren Buttons müssen alle dazwischenliegenden ebenfalls schwarz gemacht werden
                         for x in range(len(GUI.ownbuttons)):
-                            for y in range (len(GUI.ownbuttons[x])):
+                            for y in range(len(GUI.ownbuttons[x])):
 
                                 #Check ob dazwischenliegender Button auf gleicher y Koordinate liegt wie äußere Buttons
                                 if GUI.ownbuttons[x][y].data[1] == Gamelogic.__buttonspressed[
@@ -156,7 +169,9 @@ class Gamelogic:
                                         len(Gamelogic.__buttonspressed) - 1].data[0]:
                                         GUI.ownbuttons[x][y].configure(
                                         bg = 'black', fg = 'black')
-                                        Gamelogic.__ships.append(GUI.ownbuttons[x][y])
+                                        #Bug, dass ermittelte Knöpfe zu oft in Gamelogic.__ships geschrieben werden (10x), Herkunft des Fehlers konnte nicht gefunden werden
+                                        if GUI.ownbuttons[x][y] not in Gamelogic.__ships:
+                                            Gamelogic.__ships.append(GUI.ownbuttons[x][y])
 
                                     if Gamelogic.__buttonspressed[len(
                                         Gamelogic.__buttonspressed) - 1].data[
@@ -165,7 +180,9 @@ class Gamelogic:
                                         len(Gamelogic.__buttonspressed) - 2].data[0]:
                                         GUI.ownbuttons[x][y].configure(
                                         bg = 'black', fg = 'black')
-                                        Gamelogic.__ships.append(GUI.ownbuttons[x][y])
+                                        #Bug, dass ermittelte Knöpfe zu oft in Gamelogic.__ships geschrieben werden (10x), Herkunft des Fehlers konnte nicht gefunden werden
+                                        if GUI.ownbuttons[x][y] not in Gamelogic.__ships:
+                                            Gamelogic.__ships.append(GUI.ownbuttons[x][y])
                                         
                         #erst wenn alle Abfragen erfüllt sind wird zum nächsten Schiff übergegangen
                         Gamelogic.__shipcount -= 1
@@ -183,8 +200,6 @@ class Gamelogic:
                         Gamelogic.__buttonspressed) - 2].data[
                         0] == Gamelogic.__buttonspressed[
                         len(Gamelogic.__buttonspressed) - 1].data[0]:
-                        print("Abstand passt", Gamelogic.__shipcount)
-                        print(Gamelogic.__buttonspressed)
                         Gamelogic.__buttonspressed[len(
                         Gamelogic.__buttonspressed) - 2].configure(
                         bg = 'black', fg = 'black')
@@ -199,39 +214,46 @@ class Gamelogic:
                         
                         #Zwischen den beiden äußeren Buttons müssen alle dazwischenliegenden ebenfalls schwarz gemacht werden
                         for x in range(len(GUI.ownbuttons)):
-                            for y in range (len(GUI.ownbuttons[x])):
+                            for y in range(len(GUI.ownbuttons[x])):
 
                                 #Check ob dazwischenliegender Button auf gleicher x Koordinate liegt wie äußere Buttons
-                                if GUI.ownbuttons[x][y].data[0] == Gamelogic.__buttonspressed[
-                                    len(Gamelogic.__buttonspressed) - 1].data[0]:
+                                if GUI.ownbuttons[x][y].data[0] == Gamelogic.__buttonspressed[len(Gamelogic.__buttonspressed) - 1].data[0]:
 
                                     #Checks ob dazwischenliegender Button zwischen äußeren Buttons liegt
                                     if Gamelogic.__buttonspressed[len(Gamelogic.__buttonspressed) - 2].data[1] < GUI.ownbuttons[x][y].data[1] < Gamelogic.__buttonspressed[len(Gamelogic.__buttonspressed) - 1].data[1]:
                                         GUI.ownbuttons[x][y].configure(bg = 'black', fg = 'black')
-                                        Gamelogic.__ships.append(GUI.ownbuttons[x][y])
+                                        #Bug, dass ermittelte Knöpfe zu oft in Gamelogic.__ships geschrieben werden (10x), Herkunft des Fehlers konnte nicht gefunden werden
+                                        if GUI.ownbuttons[x][y] not in Gamelogic.__ships:
+                                            Gamelogic.__ships.append(GUI.ownbuttons[x][y])
 
                                     if Gamelogic.__buttonspressed[len(Gamelogic.__buttonspressed) - 1].data[1] < GUI.ownbuttons[x][y].data[1] < Gamelogic.__buttonspressed[len(Gamelogic.__buttonspressed) - 2].data[1]:
                                         GUI.ownbuttons[x][y].configure(bg = 'black', fg = 'black')
-                                        Gamelogic.__ships.append(GUI.ownbuttons[x][y])
+                                        #Bug, dass ermittelte Knöpfe zu oft in Gamelogic.__ships geschrieben werden (10x), Herkunft des Fehlers konnte nicht gefunden werden
+                                        if GUI.ownbuttons[x][y] not in Gamelogic.__ships:
+                                            Gamelogic.__ships.append(GUI.ownbuttons[x][y])
                                         
                         Gamelogic.__shipcount -= 1
                         GUI.show_shipsize(Gamelogic.__shipcount)
 
         if Gamelogic.__shipcount == 0:
             Gamelogic.send_ready()
-            if Gamelogic.enemy_ready == True:
-                for x in range(len(GUI.allbuttons)):
-                    for y in range (len(GUI.allbuttons[x])):
-                        GUI.allbuttons[x][y].grid() 
-                        GUI.allbuttons[x][y].configure(state = 'normal')
-                Gamelogic.__shipcount -= 1
-                Gamelogic.__ships = list(set(Gamelogic.__ships))
+            while True:
+                if Gamelogic.enemy_ready == True:
+                    for x in range(len(GUI.allbuttons)):
+                        for y in range (len(GUI.allbuttons[x])):
+                            GUI.allbuttons[x][y].grid() 
+                            GUI.allbuttons[x][y].configure(state = 'normal')
+                    Gamelogic.__shipcount -= 1
+                    Gamelogic.__ships = list(set(Gamelogic.__ships))
+                break
   
         if Gamelogic.__shipcount < 0:
             print("Es wurden bereits alle Schiffe platziert!")
     
     def give_shipsize():
         return Gamelogic.__shipcount
+
+    #Funktion send_data() einbringen da alle nachfolgenden Funktionen fast dasselbe tun
 
     def send_ready():
         Network.get_client().send(pickle.dumps("ready"))
@@ -240,27 +262,61 @@ class Gamelogic:
         if Gamelogic.__enemies_turn == False:
             Network.get_client().send(pickle.dumps(data))
             Gamelogic.__enemies_turn = True
+
+    def send_nearby_ship(data):
+        Network.get_client().send(pickle.dumps(data))
     
     def send_hit():
         Network.get_client().send(pickle.dumps("hit"))
         Gamelogic.set_enemy_turn_to_True()
 
+    def send_loss():
+        Network.get_client().send(pickle.dumps("won"))
+
     def check_for_hit(shot):
         for i in range(len(Gamelogic.__ships)):
             if (Gamelogic.__ships[i].data[0] == shot[0]) and (Gamelogic.__ships[i].data[1] == shot[1]):
                 Gamelogic.send_hit()
+                GUI.mark_own_hit(Gamelogic.__ships[i])
+                Gamelogic.find_nearby_ships(shot)
 
     def handle_shot(shot):
+        shot = list(shot)
+        shot.pop(0)
         for x in range(len(GUI.ownbuttons)):
             for y in range (len(GUI.ownbuttons[x])):
                 if (GUI.ownbuttons[x][y].data[0] == shot[0]) and (GUI.ownbuttons[x][y].data[1] == shot[1]):
                     GUI.ownbuttons[x][y].configure(bg = 'grey')
                     Gamelogic.__enemyshots.append(GUI.ownbuttons[x][y])
+                    Gamelogic.__enemyshots = list(set(Gamelogic.__enemyshots))
+                    #Bug dass Knöpfe öfter in GUI.__ownbuttons stehen
+                    if set(Gamelogic.__ships).issubset(Gamelogic.__enemyshots) and Gamelogic.__winner == False:
+                        Gamelogic.__winner = True
+                        GUI.tell_winner(0)
+                        Gamelogic.send_loss()
+
                     Gamelogic.set_enemy_turn_to_False()
                     Gamelogic.check_for_hit(shot)
-                    print(Gamelogic.__ships, Gamelogic.__enemyshots)
-                    if Gamelogic.__ships == Gamelogic.__enemyshots:
-                        print("Das Spiel ist vorbei, Gegner hat gewonnen!")
+    
+    def find_nearby_ships(shot):
+        for i in range(len(Gamelogic.__ships)):
+            if -1 <= Gamelogic.__ships[i].data[0] - shot[0] <= 1 and -1 <= Gamelogic.__ships[i].data[1] - shot[1] <= 1 and shot != list(Gamelogic.__ships[i].data):
+                if Gamelogic.__ships[i] not in Gamelogic.__sent_nearby_ships:
+                    Gamelogic.__sent_nearby_ships.append(Gamelogic.__ships[i])
+                    nearby_ship = list(Gamelogic.__ships[i].data)
+                    nearby_ship.insert(0, 'n')
+                    Gamelogic.send_nearby_ship((tuple(shot)))
+
+    def handle_nearby_ship(ship):
+        ship = list(ship)
+        ship.pop(0)
+        print("received nearby ship")
+        for x in range(len(GUI.allbuttons)):
+            for y in range (len(GUI.allbuttons[x])):
+                if GUI.allbuttons[x][y].data[0] == ship[0] and  GUI.allbuttons[x][y].data[1] == ship[1]:
+                    GUI.allbuttons[x][y].configure(bg = 'deep sky blue')
+                    print("configured nearby ship")
+                    Gamelogic.nearby_ships.append(GUI.allbuttons[x][y])   
 
     def get_enemy_turn():
         return Gamelogic.__enemies_turn
@@ -312,14 +368,21 @@ class Network:
                 elif from_server == "welcome2".encode():
                     print("Welcome Player 2. The game will start soon!")
                     
-            elif isinstance(pickle.loads(from_server), tuple) == True:
+            elif pickle.loads(from_server)[0] == "s":
                 Gamelogic.handle_shot(pickle.loads(from_server))
+
+            elif pickle.loads(from_server)[0] == "n":
+                Gamelogic.handle_nearby_ship(pickle.loads(from_server))
 
             elif pickle.loads(from_server) == "ready":
                 Gamelogic.enemy_ready = True
 
             elif pickle.loads(from_server) == "hit":
                 Gamelogic.set_enemy_turn_to_False()
+                GUI.mark_enemy_hit()
+            
+            elif pickle.loads(from_server) == "won":
+                GUI.tell_winner(1)
 
     def get_client():
         return Network.__client
