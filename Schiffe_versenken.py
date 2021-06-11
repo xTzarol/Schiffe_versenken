@@ -39,7 +39,7 @@ class GUI(tk.Frame):
         emptylist = []
 
         for x in range(self.grid_length):
-            GUI.allbuttons.append(buttonsincol)
+            GUI.allbuttons.append(list(set(buttonsincol)))
             buttonsincol = emptylist
             for y in range(self.grid_length):
                 b = tk.Button(master=self.f1, bg = 'deep sky blue', fg = 'deep sky blue', state = 'disabled')
@@ -70,8 +70,8 @@ class GUI(tk.Frame):
     
         
         for x in range(self.grid_length):
-            GUI.ownbuttons.append(buttonsincol)
-            GUI.allbuttons.append(buttonsincol)
+            GUI.ownbuttons.append(list(set(buttonsincol)))
+            GUI.allbuttons.append(list(set(buttonsincol)))
             buttonsincol = emptylist
             for y in range(self.grid_length + 1, self.grid_height):
                 b = tk.Button(master=self.f1,
@@ -256,6 +256,7 @@ class Gamelogic:
                 if (GUI.ownbuttons[x][y].data[0] == shot[0]) and (GUI.ownbuttons[x][y].data[1] == shot[1]):
                     GUI.ownbuttons[x][y].configure(bg = 'grey')
                     Gamelogic.__enemyshots.append(GUI.ownbuttons[x][y])
+                    Gamelogic.__enemyshots = list(set(Gamelogic.__enemyshots))
                     Gamelogic.set_enemy_turn_to_False()
                     Gamelogic.check_for_hit(shot)
                     print(Gamelogic.__ships, Gamelogic.__enemyshots)
@@ -319,6 +320,7 @@ class Network:
                 Gamelogic.enemy_ready = True
 
             elif pickle.loads(from_server) == "hit":
+                print("received hit")
                 Gamelogic.set_enemy_turn_to_False()
 
     def get_client():
