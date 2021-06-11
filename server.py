@@ -95,9 +95,6 @@ class Network:
             elif pickle.loads(from_client)[0] == "s":
                 Network.convert_shot(pickle.loads(from_client), index)
 
-            elif pickle.loads(from_client)[0] == "n":
-                Network.send_data_to_enemy(pickle.loads(from_client), index)
-
 #Einfügen dass Spieler der gerade an der Reihe ist übergeben wird damit auf richtige Verbindung gehorcht bzw. von richtiger Verbindung empfangen wird
     def convert_shot(shot, index):
         shot = list(shot)
