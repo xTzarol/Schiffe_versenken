@@ -34,6 +34,7 @@ class GUI(tk.Frame):
                 l.grid(row = y, column = x, sticky = tk.N + tk.S + tk.E + tk.W)
                 GUI.__labels.append(l)
 
+    @staticmethod
     def get_labels():
         return GUI.__labels
     
@@ -46,13 +47,15 @@ class Network:
     __HOST_ADDRESS = ""
     __clients = []
     __players_connected = False
-   
+
+    @staticmethod
     def read_config():
         config = configparser.ConfigParser()
         config.read('serverconfig.ini')
         Network.__HOST_ADDRESS = config.get('SERVER', 'HOST_ADDRESS')
         Network.__HOST_PORT = config.get('SERVER', 'HOST_PORT')
-    
+
+    @staticmethod    
     def start_server():
         Network.__server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         Network.__server.bind((Network.__HOST_ADDRESS,
@@ -62,7 +65,8 @@ class Network:
         t = threading.Thread(target = Network.accept_clients,
             args = (Network.__server,))
         t.start()
-        
+
+    @staticmethod        
     def accept_clients(started_server):
         GUI.get_labels()[2].configure(text = 'Now accepting Clients')
         while len(Network.__clients) < 2:
@@ -72,6 +76,7 @@ class Network:
                 args = (client,))
             t.start()
 
+    @staticmethod
     def send_startup_message(client_connection):
 
         if len(Network.__clients) < 2:
@@ -83,9 +88,11 @@ class Network:
             GUI.get_labels()[2].configure(text = '')
             Network.__players_connected = True
 
+    @staticmethod
     def tell_if_ready():
         return Network.__players_connected
 
+    @staticmethod
     def receive():
         while True:
             if Network.tell_if_ready() == True:
@@ -97,6 +104,7 @@ class Network:
                     t.start()
                 break
 
+    @staticmethod
     def receive_message_from_client(index):
         
         while True:
@@ -117,6 +125,7 @@ class Network:
             elif pickle.loads(from_client)[0] == "s":
                 Network.convert_shot(pickle.loads(from_client), index)
 
+    @staticmethod
     def convert_shot(shot, index):
         shot = list(shot)
         shot[2] += 11

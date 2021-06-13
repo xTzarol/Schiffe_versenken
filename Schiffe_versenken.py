@@ -13,7 +13,7 @@ class GUI(tk.Frame):
     __allbuttons = []
     __ownbuttons = []
     __ownshots = []
-    __l = None
+    __border = None
 
     def __init__(self, master):
         ctypes.windll.user32.ShowWindow \
@@ -50,8 +50,8 @@ class GUI(tk.Frame):
                 b.grid_remove()
                 buttonsincol.append(b)
 
-        GUI.__l = tk.Label(master = self.f1, bg = 'grey')
-        GUI.__l.grid(row = 10, columnspan = 10,
+        GUI.__border = tk.Label(master = self.f1, bg = 'grey')
+        GUI.__border.grid(row = 10, columnspan = 10,
             sticky = tk.N + tk.S + tk.E + tk.W)
 
         for x in range(self.grid_length):
@@ -68,12 +68,14 @@ class GUI(tk.Frame):
 
         GUI.show_shipsize(4)
 
+    @staticmethod
     def show_shipsize(size):
         if (size > 0):
-            GUI.__l.configure(text = str(size))
+            GUI.__border.configure(text = str(size))
         else:
-            GUI.__l.configure(text = '')
+            GUI.__border.configure(text = '')
 
+    @staticmethod
     def tell_winner(player):
         for x in range(len(GUI.__allbuttons)):
             for y in range(len(GUI.__allbuttons[x])):
@@ -81,48 +83,60 @@ class GUI(tk.Frame):
                 GUI.__allbuttons[x][y].configure(state = 'disabled')
 
         if (player == 1):
-            GUI.__l.configure(text='You have won!', bg = 'lawn green')
+            GUI.__border.configure(text='You have won!', bg = 'lawn green')
 
         else:
-            GUI.__l.configure(text='You have lost!', bg = 'red2')
+            GUI.__border.configure(text='You have lost!', bg = 'red2')
 
-    # Buttons des gegners werden Rot
+    # Buttons des gegners werden Rot  
     def check_for_valid_shot(self, event):
         if (event.widget['state'] == 'normal'):
             if (Gamelogic.get_enemy_turn() == False):
                 if (event.widget not in GUI.__ownshots):
-                    event.widget.configure(bg = 'grey')
+                    event.widget.configure(bg = 'grey', text = '')
                     event.widget.configure(text = '')
                     GUI.__ownshots.append(event.widget)
                     shot = list(event.widget.data)
                     shot.insert(0, 's')
                     Network.send_shot(tuple(shot))
 
+    @staticmethod
     def welcome_player(player):
         time.sleep(0.5)
         if (player == 1):
-            GUI.__l.configure(
+            GUI.__border.configure(
                 text = 'Willkommen Spieler 1. Warte auf Spieler 2! - 4'
                 )
         else:
-            GUI.__l.configure(
+            GUI.__border.configure(
                 text = 'Willkomen Spieler 2. Das Spiel kann beginnen! - 4'
                 )
 
+    @staticmethod
     def mark_enemy_hit():
         GUI.__ownshots[len(GUI.__ownshots) - 1].configure(bg = 'red')
 
+    @staticmethod
     def mark_own_hit(ship):
         ship.configure(bg = 'red')
 
+    @staticmethod
     def all_ships_placed():
-        GUI.__l.configure(text = 'Es wurden bereits alle Schiffe platziert!')
+        GUI.__border.configure(
+            text = 'Es wurden bereits alle Schiffe platziert!'
+            )
 
+    @staticmethod
     def get_all_buttons():
         return GUI.__allbuttons
 
+    @staticmethod
     def get_own_buttons():
         return GUI.__ownbuttons
+
+    @staticmethod
+    def get_border_label():
+        return GUI.__border
 
 class Gamelogic:
 
@@ -319,6 +333,7 @@ class Gamelogic:
         if Gamelogic.__shipcount < 0:
             GUI.all_ships_placed()
 
+    @staticmethod
     def handle_shot(shot):
         shot = list(shot)
         shot.pop(0)
@@ -339,6 +354,7 @@ class Gamelogic:
                         GUI.tell_winner(0)
                         Network.send_data('won')
 
+    @staticmethod
     def check_for_hit(shot):
         for i in range(len(Gamelogic.__ships)):
             if (Gamelogic.__ships[i].data[0] == shot[0]) \
@@ -346,18 +362,23 @@ class Gamelogic:
                 Network.send_hit()
                 GUI.mark_own_hit(Gamelogic.__ships[i])
 
+    @staticmethod
     def set_enemy_turn_to_False():
         Gamelogic.__enemies_turn = False
 
+    @staticmethod
     def set_enemy_turn_to_True():
         Gamelogic.__enemies_turn = True
 
+    @staticmethod
     def set_enemy_ready():
         Gamelogic.__enemy_ready = True
 
+    @staticmethod
     def get_enemy_turn():
         return Gamelogic.__enemies_turn
-    
+
+    @staticmethod    
     def give_shipsize():
         return Gamelogic.__shipcount
 
@@ -367,12 +388,14 @@ class Network:
     __HOST_PORT = 0
     __HOST_ADDRESS = ''
 
+    @staticmethod
     def read_config():
         config = configparser.ConfigParser()
         config.read('serverconfig.ini')
         Network.__HOST_ADDRESS = config.get('SERVER', 'HOST_ADDRESS')
         Network.__HOST_PORT = config.get('SERVER', 'HOST_PORT')
 
+    @staticmethod
     def connect_to_server():
         try:
             Network.__client = socket.socket(
@@ -390,19 +413,23 @@ class Network:
             messagebox.showerror(title='Connection Error',
                 message='Cannot connect to server: ' + Network.__HOST_ADDRESS
                 + ' on port: ' + str(Network.__HOST_PORT))
-    
+
+    @staticmethod    
     def send_shot(data):
-        if Gamelogic.__enemies_turn == False:
+        if Gamelogic.get_enemy_turn() == False:
             Network.__client.send(pickle.dumps(data))
-            Gamelogic.__enemies_turn = True
-    
+            Gamelogic.set_enemy_turn_to_True()
+
+    @staticmethod    
     def send_hit():
         Network.__client.send(pickle.dumps('hit'))
         Gamelogic.set_enemy_turn_to_True()
 
+    @staticmethod
     def send_data(data):
         Network.__client.send(pickle.dumps(data))
 
+    @staticmethod
     def receive_message_from_server(server_connection):
 
         while True:
