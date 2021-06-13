@@ -5,7 +5,7 @@ Das Projekt Schiffe_versenken wurde im Rahmen des Softwaretechnikunterrichts ers
 
 ## Kurzbeschreibung
 
-Das Schiffe_versenken Projekt beinhaltet grundlegende Spiellogik des Brettspielklassikers Schiffe versenken bzw. Seeschlacht. Dazu kommt die Erweiterung einer Multiplayerfunktionalität, sodass das Spiel innerhalb des gleichen Netzwerks auf zwei verschiedenen Computern gespielt werden kann. Hierfür wurde ein Server eingerichtet. Vor dem Start des Spiels ist es deshalb wichtig, in der [Serverkonfigurationsdatei](https://github.com/xTzarol/Schiffe_versenken/blob/main/serverconfig.ini) die IP Adresse des Hosts vom Server einzutragen. Auch jene Spieler, die keinen Server am Computer laufen haben müssen die IP Adresse des Servers und den entsprechenden Port eintragen.
+Das Schiffe_versenken Projekt beinhaltet grundlegende Spiellogik des Spieleklassikers Schiffe versenken bzw. Seeschlacht. Dazu kommt die Erweiterung einer Multiplayerfunktionalität, sodass das Spiel innerhalb des gleichen Netzwerks auf zwei verschiedenen Computern gespielt werden kann. Hierfür wurde ein Server eingerichtet. Vor dem Start des Spiels ist es deshalb wichtig, in der [Serverkonfigurationsdatei](https://github.com/xTzarol/Schiffe_versenken/blob/main/serverconfig.ini) die IP Adresse des Hosts vom Server einzutragen. Auch jene Spieler, die keinen Server am Computer laufen haben müssen die IP Adresse des Servers und den entsprechenden Port eintragen.
 
 Die Programmierung des Programms erfolgte in Python, sodass ein Python-Interpreter Voraussetzung für ein funktionsfähiges Programm ist. Natürlich ist es ebenfalls möglich, das Programm in Dateien mit dem Dateiformat .exe umzuwandeln.
 
