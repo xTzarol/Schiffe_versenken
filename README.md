@@ -11,8 +11,8 @@ Die Programmierung des Programms erfolgte in Python, sodass ein Python-Interpret
 
 ## Verbesserungsmöglichkeiten
 
-- [] Aufdecken umliegender Felder bei vollständiger Zerstörung eines Schiffs
+- [ ] Aufdecken umliegender Felder bei vollständiger Zerstörung eines Schiffs
 
-- [] graphische Aufbereitung
+- [ ] graphische Aufbereitung
 
-- [] erweiterte Multiplayerfunktionalität
+- [ ] erweiterte Multiplayerfunktionalität
